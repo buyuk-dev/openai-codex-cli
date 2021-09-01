@@ -44,5 +44,6 @@ character:
     .save <path> // save current context in the file <path>
     .load <path> // replace current context with the content loaded from <path>
     .erase  // remove last line from the current context
+    .help   // print list of available commands
     .       // this is a special command used to repeat last command that was executed.
 

@@ -79,6 +79,20 @@ def on_exit(*args, **kwargs):
     print("Goodbye...")
     exit()
 
+def on_help(*args, **kwargs):
+    """ Handler for the .help command.
+        Will print available dot commands.
+    """
+    print("""
+    .save <path>  : save current context to the file
+    .load <path>  : replace current context with the content loaded from a file
+    .erase        : remove last line of the current context
+    .exit         : exit from the script
+    .help         : print this help message
+    .             : repeat last command that was executed
+    """)
+    input("Press Enter to continue...")
+
 def on_repeat_last_cmd(*args, **kwargs):
     """ Handler for the . command.
     """
@@ -97,6 +111,7 @@ COMMANDS = {
     ".exit" : on_exit,
     ".load" : on_load,
     ".erase": on_erase,
+    ".help": on_help,
     ".": on_repeat_last_cmd
 }
 
