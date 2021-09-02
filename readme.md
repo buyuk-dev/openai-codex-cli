@@ -1,21 +1,22 @@
-# Testing grounds for the OpenAI Codex and GPT-3 Beta
+# OpenAI Codex beta test environment
+
+## Content
+
+1. codex.py: interactive script enabling playground-like environment to test Codex completion.
+2. vim-codex: vim plugin that enables autocompletion with OpenAI Codex.
 
 I was recently granted access to the beta of OpenAI codex, and decided to setup this repo to
 share the scripts and environment I use for playing around with the Codex API.
 
+All tools in this repo require python3 with openai package installed. You can do this with the following command:
 
-codex.py script is my command line interface for interactively working with codex completion.
-It allows semi-interactive way of using the API for writing code by providing natural language
-description of steps. It requires some manual tweaking currently, as the entire content of the
-script needs to be wrapped within the window.onload function, but with some tinkering i may be able
-to fix this issue in the future.
+    python3 -m pip install openai
 
 
-To use the script install openai package using pip install openai command.
-
-Basic usage:
+## Interactive prompt
 
     python codex.py --language {javascript, cpp, python, html} --context <path> --temperature=0.1
+
 
 Default language is javascript, as its the one i played the most with for its quick and easy
 visual setup with simple html.
@@ -70,3 +71,9 @@ You can either call the completion function or add a mapping to the ~/.vimrc fil
     
     // Add to .vimrc to map to Ctrl + Space key combo.
     map <C-@> :GenerateCodexCompletion <CR>
+    
+Additional commands supported by the plugin:
+
+1. DetermineSourceLanguage()            // Plugin attempts to determine which programming language is used in the current buffer.
+2. CheckLanguageSupport("javascript")   // Check if the language is supported by the plugin.
+3. let b:codex_lang = "python"          // Variable that can be set to force the use of a specific programming language.
