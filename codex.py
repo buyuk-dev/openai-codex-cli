@@ -7,13 +7,14 @@ from typing import Optional
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+import languages
 
-# CODEX GLOBAL STATE
+
 g_source, g_prompt = [], ""
-
 g_last_cmd = None
 g_last_cmd_args = list()
 g_last_cmd_kwargs = dict()
+
 
 def get_source() -> Optional[list[str]]:
     """ Returns a multiline string representation of the source code.
@@ -52,8 +53,6 @@ def load(path : str) -> list[str]:
         lines = file_.read()
         return lines.splitlines()
 
-
-# CODEX INTERFACE COMMANDS
 
 def on_save(path, *args, **kwargs):
     """ Handler for the .save <path> command.
@@ -116,43 +115,15 @@ COMMANDS = {
 }
 
 
-# PROGRAMMING LANGUAGES SUPPORT
-
-LANGUAGE_CONFIG = {
-    "javascript": {
-        "prompt": "// {}",
-        "stop": "//",
-        "hint": "// --- JavaScript ---"
-    },
-    "python": {
-        "prompt": "# {}",
-        "stop": "#",
-        "hint": "#/usr/bin/env python3"
-    },
-    "cpp": {
-        "prompt": "// {}",
-        "stop": "//",
-        "hint": "// --- CPP ---"
-    },
-    "html": {
-        "prompt": "<!-- {} -->",
-        "stop": "<!--",
-        "hint": "<!doctype html>"
-    }
-}
-
-
-# CODEX API
-
-def format_prompt(source: str, prompt: Optional[str], language) -> str:
+def format_prompt(source: str, prompt: Optional[str], language: str) -> str:
     """ Format source and prompt into a soure code that will be fed into Codex API for completion.
     """
-    if language not in LANGUAGE_CONFIG:
+    if not languages.is_language_supported(language):
         raise KeyError("Unknown language: {language}...")
 
     context = source
     if len(prompt) > 0:
-        comment = LANGUAGE_CONFIG[language]["prompt"].format(prompt)
+        comment = languages.CONFIG[language]["prompt"].format(prompt)
         context = f"{context}\n\n{comment}"
 
     return context   
@@ -169,12 +140,11 @@ def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: st
         prompt=context,
         max_tokens=max_tokens,
         temperature=temperature,
-        stop=LANGUAGE_CONFIG[language]["stop"]
+        stop=languages.CONFIG[language]["stop"]
     )
     return "{}{}".format(context, response["choices"][0]["text"]).splitlines()
 
 
-# PARSING CLI ARGS AND EXECUTING MAIN LOOP
 def update_last_command(command, args=list(), kwargs=dict()):
     global g_last_cmd
     global g_last_cmd_args
@@ -219,7 +189,7 @@ if __name__ == '__main__':
     if args.context is not None:
         set_source(load(args.context))
     else:
-        set_source([LANGUAGE_CONFIG[args.language]["hint"]])
+        set_source([languages.CONFIG[args.language]["hint"]])
 
     while True:
         os.system("clear")
