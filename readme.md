@@ -47,3 +47,9 @@ character:
     .help   // print list of available commands
     .       // this is a special command used to repeat last command that was executed.
 
+## Vim plugin
+
+Plugin is currently capable of injecting the completion after the current line into the current buffer.
+Completion is triggered by GenerateCodexCompletion command.
+
+Currently hardcoded for javascript completion.
