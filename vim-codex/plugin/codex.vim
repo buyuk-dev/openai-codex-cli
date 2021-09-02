@@ -16,17 +16,22 @@ sys.path.insert(0, python_root_dir)
 
 import codex
 
+
 def get_codex_language_option():
     return vim.eval("b:codex_lang")
 
-def check_language_support(lang):
-    return codex.languages.is_language_supported(lang)
 
 def get_current_filename():
     return vim.eval("expand('%:t')")
 
+
 def get_current_file_extension():
     return vim.eval("expand('%:e')")
+
+
+def check_language_support(lang):
+    return codex.languages.is_language_supported(lang)
+
 
 def get_language_from_extension():
     filename = get_current_filename()
@@ -34,24 +39,24 @@ def get_language_from_extension():
     ext2lang = {
         "js": "javascript",
         "cpp": "cpp",
-        "cxx": "cxx",
+        "hpp": "cpp",
+        "h": "cpp",
         "py": "python",
         "html": "html",
-        "h": "cpp",
-        "hpp": "cpp",
-        "vim": "vim",
     }
-    if extension in ext2lang:
-        return ext2lang[extension]
+    return ext2lang.get(extension, "none")
 
 
 def determine_source_language():
     """ Attempts to determine the programming language used in current buffer.
+        Value of b:codex_lang takes precedense before file extension, which may be useful for
+        overriding language for example in case of embedded code fragments.
     """
     lang = get_codex_language_option()
     if lang == "none":
         lang = get_language_from_extension()
-        vim.command(f"let b:codex_lang='{lang}'")
+
+    vim.command(f"let b:codex_lang='{lang}'")
     return lang
 
 
@@ -69,11 +74,17 @@ def generate_codex_completion():
 
     row, col = vim.current.window.cursor
     context = vim.current.buffer[:row]
+
     completion = codex.codex("\n".join(context), None, language=lang, concat=False)
 
-    vim.current.buffer[row-1] = context[-1] + completion[0]
+    # Append first line from completion to the current line. Insert remaining lines after current line.
+    vim.current.line = vim.current.line + completion[0]
     vim.current.buffer.append(completion[1:], row)
-    vim.current.window.cursor = row + len(completion), len(completion[-1])
+
+    # Move cursor to the last inserted line.
+    vim.current.window.cursor = (row + len(completion), 0)
+    row, col = vim.current.window.cursor
+    vim.current.window.cursor = (row, len(vim.current.line))
 
 EOF
 
