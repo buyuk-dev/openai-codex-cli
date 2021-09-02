@@ -28,7 +28,7 @@ def get_current_filename():
 def get_current_file_extension():
     return vim.eval("expand('%:e')")
 
-def get_syntax_language():
+def get_language_from_extension():
     filename = get_current_filename()
     extension = get_current_file_extension()
     ext2lang = {
@@ -39,7 +39,7 @@ def get_syntax_language():
         "html": "html",
         "h": "cpp",
         "hpp": "cpp",
-        "vim": "vim"
+        "vim": "vim",
     }
     if extension in ext2lang:
         return ext2lang[extension]
@@ -50,7 +50,8 @@ def determine_source_language():
     """
     lang = get_codex_language_option()
     if lang == "none":
-        lang = get_syntax_language()
+        lang = get_language_from_extension()
+        vim.command(f"let b:codex_lang='{lang}'")
     return lang
 
 
