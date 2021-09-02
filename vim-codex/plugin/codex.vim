@@ -18,14 +18,40 @@ import codex
 def check_language_support(lang):
     print( codex.languages.is_language_supported(lang) )
 
+def get_current_filename():
+    return vim.eval("expand('%:t')")
+
+def get_current_file_extension():
+    return vim.eval("expand('%:e')")
+
 def get_syntax_language():
-    return "javascript"
+    filename = get_current_filename()
+    extension = get_current_file_extension()
+    return {
+        "js": "javascript",
+        "cpp": "cpp",
+        "cxx": "cxx",
+        "py": "python",
+        "html": "html",
+        "h": "cpp",
+        "hpp": "cpp"
+    }[extension]
 
 def generate_codex_completion():
+    lang = get_syntax_language()
+
+    if not codex.languages.is_language_supported(lang):
+        print(f"Error: language {lang} is not supported.")
+        return
+
     row, col = vim.current.window.cursor
     context = vim.current.buffer[:row]
-    completion = codex.codex("\n".join(context), None, language=get_syntax_language(), concat=False)
-    vim.current.buffer.append(completion, row)
+    completion = codex.codex("\n".join(context), None, language=lang, concat=False)
+
+    vim.current.buffer[row-1] = context[-1] + completion[0]
+    vim.current.buffer.append(completion[1:], row)
+    vim.current.window.cursor = row + len(completion), len(completion[-1])
+
 EOF
 
 function! CheckLanguageSupport(lang)

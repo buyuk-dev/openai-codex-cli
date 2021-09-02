@@ -50,6 +50,17 @@ character:
 ## Vim plugin
 
 Plugin is currently capable of injecting the completion after the current line into the current buffer.
-Completion is triggered by GenerateCodexCompletion command.
-
 Currently hardcoded for javascript completion.
+
+You can either call the completion function or add a mapping to the ~/.vimrc file like so:
+
+    // Direct call:
+    :call GenerateCodexCompletion()
+
+    // Using command shorthand:
+    :GenerateCodexCompletion
+    
+    // Add to .vimrc to map to Ctrl + Space key combo.
+    map <C-@> :GenerateCodexCompletion <CR>
+
+
