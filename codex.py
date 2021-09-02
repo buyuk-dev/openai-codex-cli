@@ -2,7 +2,7 @@
 
 import os
 import argparse
-from typing import Optional
+from typing import Optional, Callable
 
 import openai
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -54,14 +54,14 @@ def load(path : str) -> list[str]:
         return lines.splitlines()
 
 
-def on_save(path, *args, **kwargs):
+def on_save(path: str, *args, **kwargs):
     """ Handler for the .save <path> command.
     """
     print(f"Saving code to {path} ...")
     save(get_source(), path)
 
 
-def on_load(path, *args, **kwargs):
+def on_load(path: str, *args, **kwargs):
     """ Handler for the .load <path> command.
     """
     print(f"Loading context from {path} ...")
@@ -121,15 +121,18 @@ def format_prompt(source: str, prompt: Optional[str], language: str) -> str:
     if not languages.is_language_supported(language):
         raise KeyError("Unknown language: {language}...")
 
+    if prompt is None:
+        prompt = ""
+
     context = source
     if len(prompt) > 0:
         comment = languages.CONFIG[language]["prompt"].format(prompt)
-        context = f"{context}\n\n{comment}"
+        context = f"{source}\n\n{comment}"
 
     return context   
 
 
-def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: str = 'javascript', temperature=0.1) -> str:
+def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: str = 'javascript', temperature=0.1, concat=True) -> str:
     """ Write code with the help from openAI Codex API.
         * context : source code which AI is supposed to complete
         * prompt  : natural language command that will be appended as a comment to the source. 
@@ -142,10 +145,18 @@ def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: st
         temperature=temperature,
         stop=languages.CONFIG[language]["stop"]
     )
-    return "{}{}".format(context, response["choices"][0]["text"]).splitlines()
+
+    completion = response["choices"][0]["text"]
+ 
+    if concat:
+        return "{}{}".format(context, completion).splitlines()
+
+    return completion.splitlines()
 
 
-def update_last_command(command, args=list(), kwargs=dict()):
+def update_last_command(command: Callable, args=list(), kwargs=dict()):
+    """ Save last executed command with arguments to be able to repeat it.
+    """
     global g_last_cmd
     global g_last_cmd_args
     global g_last_cmd_kwargs
@@ -154,7 +165,7 @@ def update_last_command(command, args=list(), kwargs=dict()):
     g_last_cmd_kwargs = kwargs 
 
 
-def handle_command_prompt(prompt):
+def handle_command_prompt(prompt: str):
     """ Handle .<command> [<args> ...] prompt.
     """
     cmd, *args = prompt.split()
@@ -166,6 +177,7 @@ def handle_command_prompt(prompt):
 
         if cmd != ".":
             update_last_command(command, args)
+
 
 
 if __name__ == '__main__':
