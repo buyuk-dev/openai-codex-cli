@@ -12,7 +12,13 @@ All tools in this repo require python3 with openai package installed. You can do
 
     python3 -m pip install openai
 
+
+## How it looks like
+
+### Vim plugin
 ![plugin](https://github.com/buyuk-dev/openai-codex-cli/blob/04dd216ebd86e6c9cd725b8f1596443fb87a5dd3/ezgif.com-gif-maker%20(1).gif?raw=true)
+
+### Interactive prompt
 ![prompt](https://github.com/buyuk-dev/openai-codex-cli/blob/master/ezgif.com-gif-maker.gif?raw=true)
 
 
