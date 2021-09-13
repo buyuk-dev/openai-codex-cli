@@ -132,18 +132,21 @@ def format_prompt(source: str, prompt: Optional[str], language: str) -> str:
     return context   
 
 
-def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: str = 'javascript', temperature=0.1, concat=True) -> str:
+def codex(source: str, prompt: Optional[str], max_tokens: int = 64, language: str = 'javascript', temperature=0.1, concat=True, stop=None) -> str:
     """ Write code with the help from openAI Codex API.
         * context : source code which AI is supposed to complete
         * prompt  : natural language command that will be appended as a comment to the source. 
     """
+    if stop is None:
+        stop = languages.CONFIG[language]["stop"]
+
     context = format_prompt(source, prompt, language)
     response = openai.Completion.create(
         engine="davinci-codex",
         prompt=context,
         max_tokens=max_tokens,
         temperature=temperature,
-        stop=languages.CONFIG[language]["stop"]
+        stop=stop
     )
 
     completion = response["choices"][0]["text"]

@@ -3,6 +3,9 @@
 
 let s:plugin_root_dir = fnamemodify(resolve(expand('<sfile>:p')), ':h')
 let b:codex_lang = 'none'
+let b:codex_temp = 0.1
+let b:codex_tokens = 64
+let b:codex_stop = 'none'
 
 python3 << EOF
 
@@ -19,6 +22,26 @@ import codex
 
 def get_codex_language_option():
     return vim.eval("b:codex_lang")
+
+
+def get_codex_temp_option():
+    return float(vim.eval("b:codex_temp"))
+
+
+def get_codex_tokens_option():
+    return int(vim.eval("b:codex_tokens"))
+
+
+def get_codex_stop_option():
+    return vim.eval("b:codex_stop")
+
+
+def get_codex_stop_option_as_list():
+    stop_option = get_codex_stop_option()
+    if stop_option == 'none':
+        return None
+    else:
+        return stop_option.split(',')
 
 
 def get_current_filename():
@@ -75,14 +98,22 @@ def generate_codex_completion():
     row, col = vim.current.window.cursor
     context = vim.current.buffer[:row]
 
-    completion = codex.codex("\n".join(context), None, language=lang, concat=False)
+    completion = codex.codex(
+        "\n".join(context),
+        None,
+        language=lang,
+        concat=False,
+        temperature=get_codex_temp_option(),
+        max_tokens=get_codex_tokens_option(),
+        stop=get_codex_stop_option_as_list()
+    )
 
     # Append first line from completion to the current line. Insert remaining lines after current line.
     vim.current.line = vim.current.line + completion[0]
     vim.current.buffer.append(completion[1:], row)
 
     # Move cursor to the last inserted line.
-    vim.current.window.cursor = (row + len(completion), 0)
+    vim.current.window.cursor = (row + len(completion) - 1, 0)
     row, col = vim.current.window.cursor
     vim.current.window.cursor = (row, len(vim.current.line))
 

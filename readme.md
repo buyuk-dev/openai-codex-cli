@@ -86,3 +86,6 @@ Additional commands supported by the plugin:
 1. DetermineSourceLanguage()            // Plugin attempts to determine which programming language is used in the current buffer.
 2. CheckLanguageSupport("javascript")   // Check if the language is supported by the plugin.
 3. let b:codex_lang = "python"          // Variable that can be set to force the use of a specific programming language.
+4. let b:codex_temp = 0.1               // Override default temperature parameter.
+5. let b:codex_stop = "</html>"         // Override stop sequence, can use comma to indicate a list.
+6. let b:codex_tokens = 64              // Override max_tokens which by default is 64 to get shorter or longer completion.
